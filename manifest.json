@@ -1,0 +1,13 @@
+{
+  "manifest_version": 3,
+  "name": "When2meet Calendar Fill",
+  "version": "1.0.0",
+  "description": "Fill your When2meet availability from your Google Calendar (iCal secret address). No sign-in, data stays in your browser.",
+  "permissions": ["activeTab", "scripting", "storage"],
+  "host_permissions": ["https://calendar.google.com/*"],
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": { "16": "icons/16.png", "48": "icons/48.png", "128": "icons/128.png" }
+  },
+  "icons": { "16": "icons/16.png", "48": "icons/48.png", "128": "icons/128.png" }
+}

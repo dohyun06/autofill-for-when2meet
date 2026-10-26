@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<style>
+  body { width: 320px; margin: 12px; font: 13px system-ui, sans-serif; }
+  label { display: block; margin-bottom: 4px; font-weight: 600; }
+  textarea { width: 100%; box-sizing: border-box; height: 72px; font: 11px ui-monospace, monospace; }
+  p.help { color: #555; margin: 4px 0 10px; }
+  button { width: 100%; padding: 8px; background: #339900; color: #fff; border: 0; border-radius: 4px; font-weight: 600; cursor: pointer; }
+  #status { margin-top: 8px; min-height: 1em; }
+</style>
+</head>
+<body>
+  <label for="urls">Google Calendar iCal 비공개 주소</label>
+  <textarea id="urls" placeholder="https://calendar.google.com/calendar/ical/.../private-.../basic.ics"></textarea>
+  <p class="help">캘린더 설정 → 캘린더 통합 → "iCal 형식의 비공개 주소". 캘린더가 여러 개면 한 줄에 하나씩. 주소는 이 브라우저에만 저장돼요.</p>
+  <button id="fill">내 캘린더로 채우기</button>
+  <div id="status" role="status"></div>
+  <script src="vendor/ical.min.js"></script>
+  <script src="calendar.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>
