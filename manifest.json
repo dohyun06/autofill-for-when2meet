@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "When2meet Calendar Fill",
+  "name": "Autofill for When2meet",
   "version": "1.0.0",
   "description": "Fill When2meet availability from your calendar's iCal address (Google, Outlook, iCloud). No sign-in; data stays local.",
   "permissions": ["activeTab", "scripting", "storage"],

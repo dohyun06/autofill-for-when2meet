@@ -1,4 +1,4 @@
-# When2meet Calendar Fill
+# Autofill for When2meet
 
 캘린더 iCal 주소로 when2meet 가용 시간을 자동으로 칠하는 크롬 익스텐션. OAuth 없음.
 
@@ -19,7 +19,7 @@
 - 테스트: `TZ=Asia/Seoul node test.js`
 
 ## 웹스토어 배포
-1. `zip -r ../when2meet-calendar-fill.zip manifest.json popup.html popup.js calendar.js vendor icons`
+1. `zip -r ../autofill-for-when2meet.zip manifest.json popup.html popup.js calendar.js vendor icons`
 2. https://chrome.google.com/webstore/devconsole 개발자 등록($5, 1회) → 새 항목 → zip 업로드
 3. 스토어 등록정보: 설명, 스크린샷(1280x800) 1장 이상, 아이콘 `icons/128.png`
 4. 개인정보 보호: `PRIVACY.md`를 GitHub 등에 공개하고 URL 입력. 권한 사유:
