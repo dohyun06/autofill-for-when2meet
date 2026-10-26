@@ -51,11 +51,12 @@ function busyIntervals(icsText, rangeStart, rangeEnd, recurringOnly) {
 }
 
 // Maps a "days of the week" slot (placeholder date) to the same local weekday + time in each of
-// the `weeks` weeks starting from `now` (Date). Local = browser time zone, same as the grid shows.
+// the `weeks` weeks starting from `now` (Date). when2meet stores these as wall-clock times in UTC
+// (the grid is pinned to UTC), so read them with UTC getters and place them in the browser's zone.
 function realTimesForWeekday(slot, now, weeks) {
   var s = new Date(slot * 1000), out = [];
-  var d = new Date(now.getFullYear(), now.getMonth(), now.getDate() + (s.getDay() - now.getDay() + 7) % 7,
-    s.getHours(), s.getMinutes());
+  var d = new Date(now.getFullYear(), now.getMonth(), now.getDate() + (s.getUTCDay() - now.getDay() + 7) % 7,
+    s.getUTCHours(), s.getUTCMinutes());
   for (var k = 0; k < weeks; k++, d.setDate(d.getDate() + 7)) out.push(d.getTime() / 1000);
   return out;
 }

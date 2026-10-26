@@ -40,11 +40,11 @@ assert.deepStrictEqual(busy, [
   // 11-16 is EXDATE'd, so 01:00 stays free
 ]);
 
-// Days-of-the-week mode (run with TZ=Asia/Seoul), placeholder dates in 1999.
+// Days-of-the-week mode (run with TZ=Asia/Seoul). Placeholders hold wall-clock times as UTC, like when2meet's 1978 dates.
 // Mon 10:00/10:45: weekly event (busy despite the 11-16 EXDATE). Mon 12:15: the moved 11-09 occurrence.
 // Mon 11:00: free. Tue 10:00: only a one-off event, ignored -> free.
-var at = function (day, hm) { return Date.parse('1999-01-0' + day + 'T' + hm + ':00+09:00') / 1000; }; // 4 = Mon, 5 = Tue
-var dow = [at(4, '10:00'), at(4, '10:45'), at(4, '11:00'), at(4, '12:15'), at(5, '10:00')];
+var at = function (day, hm) { return Date.parse('1978-11-' + day + 'T' + hm + ':00Z') / 1000; }; // 13 = Mon, 14 = Tue
+var dow = [at(13, '10:00'), at(13, '10:45'), at(13, '11:00'), at(13, '12:15'), at(14, '10:00')];
 var dowFree = freeSlots([ics], dow, { weekdays: true, weeks: 4, now: new Date('2026-11-01T12:00:00+09:00') });
-assert.deepStrictEqual(dowFree, [at(4, '11:00'), at(5, '10:00')]);
+assert.deepStrictEqual(dowFree, [at(13, '11:00'), at(14, '10:00')]);
 console.log('ok');
