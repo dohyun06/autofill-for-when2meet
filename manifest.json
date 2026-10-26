@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "When2meet Calendar Fill",
   "version": "1.0.0",
-  "description": "Fill your When2meet availability from any calendar's iCal address (Google, Outlook, iCloud...). No sign-in, data stays in your browser.",
+  "description": "Fill When2meet availability from your calendar's iCal address (Google, Outlook, iCloud). No sign-in; data stays local.",
   "permissions": ["activeTab", "scripting", "storage"],
   "optional_host_permissions": ["https://*/*"],
   "action": {
