@@ -66,9 +66,12 @@ async function run(tabId, urls) {
 document.getElementById('fill').addEventListener('click', async function () {
   var urls = urlsEl.value.split('\n').map(function (s) { return s.trim().replace(/^webcal:/, 'https:'); }).filter(Boolean);
   chrome.storage.local.set({ urls: urlsEl.value });
-  if (!urls.length) return say('iCal 비공개 주소를 넣어주세요.');
-  if (urls.some(function (u) { return !u.startsWith('https://calendar.google.com/'); }))
-    return say('Google Calendar 주소(https://calendar.google.com/…)만 지원해요.');
+  if (!urls.length) return say('iCal 주소를 넣어주세요.');
+  var origins;
+  try { origins = urls.map(function (u) { var o = new URL(u); if (o.protocol !== 'https:') throw 0; return o.origin + '/*'; }); }
+  catch (e) { return say('https:// 또는 webcal:// 주소만 넣어주세요.'); }
+  // Must run before any other await: needs the click's user gesture. Already-granted origins don't prompt.
+  if (!(await chrome.permissions.request({ origins: origins }))) return say('캘린더 주소 접근을 허용해야 해요.');
 
   var tab = (await chrome.tabs.query({ active: true, currentWindow: true }))[0];
   if (!/^https:\/\/(www\.)?when2meet\.com\//.test(tab.url || '')) return say('when2meet 탭에서 눌러주세요.');
