@@ -1,4 +1,4 @@
-// node test.js
+// TZ=Asia/Seoul node test.js
 var assert = require('assert');
 var freeSlots = require('./calendar.js').freeSlots;
 
@@ -16,6 +16,8 @@ var ics = [
   'BEGIN:VEVENT', 'UID:holiday', 'DTSTART;VALUE=DATE:20261102', 'DTEND;VALUE=DATE:20261103', 'TRANSP:TRANSPARENT', 'END:VEVENT',
   // one-off UTC event
   'BEGIN:VEVENT', 'UID:once', 'DTSTART:20261102T031500Z', 'DTEND:20261102T033000Z', 'END:VEVENT',
+  // one-off Tue 2026-11-03 10:00-11:00 KST: outside the date-mode slots, must be ignored in weekday mode
+  'BEGIN:VEVENT', 'UID:once2', 'DTSTART;TZID=Asia/Seoul:20261103T100000', 'DTEND;TZID=Asia/Seoul:20261103T110000', 'END:VEVENT',
   'END:VCALENDAR',
 ].join('\r\n');
 
@@ -37,4 +39,12 @@ assert.deepStrictEqual(busy, [
   '2026-11-09T03:00:00.000Z', '2026-11-09T03:15:00.000Z',
   // 11-16 is EXDATE'd, so 01:00 stays free
 ]);
+
+// Days-of-the-week mode (run with TZ=Asia/Seoul), placeholder dates in 1999.
+// Mon 10:00/10:45: weekly event (busy despite the 11-16 EXDATE). Mon 12:15: the moved 11-09 occurrence.
+// Mon 11:00: free. Tue 10:00: only a one-off event, ignored -> free.
+var at = function (day, hm) { return Date.parse('1999-01-0' + day + 'T' + hm + ':00+09:00') / 1000; }; // 4 = Mon, 5 = Tue
+var dow = [at(4, '10:00'), at(4, '10:45'), at(4, '11:00'), at(4, '12:15'), at(5, '10:00')];
+var dowFree = freeSlots([ics], dow, { weekdays: true, weeks: 4, now: new Date('2026-11-01T12:00:00+09:00') });
+assert.deepStrictEqual(dowFree, [at(4, '11:00'), at(5, '10:00')]);
 console.log('ok');

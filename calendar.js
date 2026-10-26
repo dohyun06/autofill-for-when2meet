@@ -6,7 +6,8 @@ var SLOT_SECONDS = 900; // when2meet grids are always 15-minute slots
 var MAX_OCCURRENCES = 20000; // guards against runaway RRULEs (e.g. no end, minutely)
 
 // Returns [[startSec, endSec], ...] of busy time overlapping [rangeStart, rangeEnd).
-function busyIntervals(icsText, rangeStart, rangeEnd) {
+// recurringOnly: skip one-off events (for "days of the week" events, which describe a typical week).
+function busyIntervals(icsText, rangeStart, rangeEnd, recurringOnly) {
   var vcal = new ICAL.Component(ICAL.parse(icsText));
   vcal.getAllSubcomponents('vtimezone').forEach(function (tz) {
     ICAL.TimezoneService.register(tz);
@@ -35,7 +36,10 @@ function busyIntervals(icsText, rangeStart, rangeEnd) {
 
   Object.keys(masters).forEach(function (k) {
     var ev = masters[k];
-    if (!ev.isRecurring()) return add(ev.component, ev.startDate, ev.endDate);
+    if (!ev.isRecurring()) {
+      if (!recurringOnly) add(ev.component, ev.startDate, ev.endDate);
+      return;
+    }
     var it = ev.iterator();
     for (var n = 0, next; (next = it.next()) && n < MAX_OCCURRENCES; n++) {
       var occ = ev.getOccurrenceDetails(next);
@@ -46,13 +50,31 @@ function busyIntervals(icsText, rangeStart, rangeEnd) {
   return out;
 }
 
+// Maps a "days of the week" slot (placeholder date) to the same local weekday + time in each of
+// the `weeks` weeks starting from `now` (Date). Local = browser time zone, same as the grid shows.
+function realTimesForWeekday(slot, now, weeks) {
+  var s = new Date(slot * 1000), out = [];
+  var d = new Date(now.getFullYear(), now.getMonth(), now.getDate() + (s.getDay() - now.getDay() + 7) % 7,
+    s.getHours(), s.getMinutes());
+  for (var k = 0; k < weeks; k++, d.setDate(d.getDate() + 7)) out.push(d.getTime() / 1000);
+  return out;
+}
+
 // slots: when2meet TimeOfSlot (unix seconds). Returns the slots with no busy overlap.
-function freeSlots(icsTexts, slots) {
-  var lo = Math.min.apply(null, slots), hi = Math.max.apply(null, slots) + SLOT_SECONDS;
+// opts.weekdays: slots are placeholder weekdays; check recurring events over the next opts.weeks weeks.
+function freeSlots(icsTexts, slots, opts) {
+  opts = opts || {};
+  var times = slots.map(function (t) {
+    return opts.weekdays ? realTimesForWeekday(t, opts.now || new Date(), opts.weeks || 4) : [t];
+  });
+  var all = [].concat.apply([], times);
+  var lo = Math.min.apply(null, all), hi = Math.max.apply(null, all) + SLOT_SECONDS;
   var busy = [];
-  icsTexts.forEach(function (t) { busy = busy.concat(busyIntervals(t, lo, hi)); });
-  return slots.filter(function (t) {
-    return !busy.some(function (b) { return b[0] < t + SLOT_SECONDS && b[1] > t; });
+  icsTexts.forEach(function (t) { busy = busy.concat(busyIntervals(t, lo, hi, opts.weekdays)); });
+  return slots.filter(function (t, i) {
+    return times[i].every(function (r) {
+      return !busy.some(function (b) { return b[0] < r + SLOT_SECONDS && b[1] > r; });
+    });
   });
 }
 

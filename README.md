@@ -12,9 +12,11 @@
 
 일정이 있는 칸은 불가능, 없는 칸은 가능으로 **덮어씁니다**. "바쁨 표시 안 함"(투명) 일정과 기본 종일 일정은 무시합니다.
 
+요일 형식 이벤트: 앞으로 4주 동안 그 요일·시간에 **반복 일정**이 한 번이라도 있으면 불가능. 일회성 일정은 무시.
+
 ## 개발
 - 로드: `chrome://extensions` → 개발자 모드 → "압축해제된 확장 프로그램을 로드합니다" → 이 폴더
-- 테스트: `node test.js`
+- 테스트: `TZ=Asia/Seoul node test.js`
 
 ## 웹스토어 배포
 1. `zip -r ../when2meet-calendar-fill.zip manifest.json popup.html popup.js calendar.js vendor icons`

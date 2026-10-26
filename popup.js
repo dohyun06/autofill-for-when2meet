@@ -7,7 +7,8 @@ chrome.storage.local.get('urls', function (r) { urlsEl.value = r.urls || ''; });
 // Runs in the when2meet page (MAIN world) so it can see the page's own globals.
 function readPage() {
   if (typeof TimeOfSlot === 'undefined') return null;
-  return { slots: TimeOfSlot, user: UserID };
+  var tz = document.getElementById('ParticipantTimeZone');
+  return { slots: TimeOfSlot, user: UserID, tz: tz && tz.value };
 }
 
 // Runs in the page. Mirrors the site's SelectStop() save, but for arbitrary (non-rectangular) slot sets.
@@ -46,8 +47,11 @@ async function run(tabId, urls) {
   var page = (await chrome.scripting.executeScript({ target: { tabId: tabId }, world: 'MAIN', func: readPage }))[0].result;
   if (!page) return say('when2meet 이벤트 페이지가 아니에요.');
   if (!page.user) return say('먼저 when2meet에서 이름을 입력해 로그인하세요.');
-  // shortcut: "days of the week" events use fake dates, so calendar matching is meaningless; support if someone needs it.
-  if (page.slots[0] < Date.UTC(2000, 0, 1) / 1000) return say('요일 형식 이벤트는 지원하지 않아요.');
+  // "Days of the week" events use placeholder dates (Nov 1978), shown in the grid's selected time zone.
+  var weekdays = page.slots[0] < Date.UTC(2000, 0, 1) / 1000;
+  // shortcut: weekday mapping uses the browser time zone; convert via Intl if people pick a different one.
+  if (weekdays && page.tz && page.tz !== Intl.DateTimeFormat().resolvedOptions().timeZone)
+    return say('요일 형식은 when2meet 시간대가 이 컴퓨터 시간대와 같을 때만 지원해요.');
 
   say('캘린더 불러오는 중…');
   var texts = await Promise.all(urls.map(async function (u) {
@@ -55,7 +59,8 @@ async function run(tabId, urls) {
     if (!res.ok) throw new Error('캘린더 주소 오류 (' + res.status + '): 주소를 다시 확인하세요.');
     return res.text();
   }));
-  var free = freeSlots(texts, page.slots);
+  // weekdays: only recurring events, over the next 4 weeks
+  var free = freeSlots(texts, page.slots, { weekdays: weekdays });
 
   say('칠하는 중…');
   var r = (await chrome.scripting.executeScript({ target: { tabId: tabId }, world: 'MAIN', func: applyFree, args: [free] }))[0].result;
